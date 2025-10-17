@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chat Notification and Read Aloud
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Plays a notification bell on new messages and reads them aloud (with toggle setting)
 // @author       Upamanyu Das
 // @match        https://vdo.ninja/*
@@ -16,19 +16,15 @@
     // Initialize read aloud setting (default: true)
     let readAloudEnabled = GM_getValue('readAloudEnabled', true);
 
-    // Function to update menu command
-    function updateMenu() {
-        GM_registerMenuCommand(readAloudEnabled ? 'Disable Read Aloud' : 'Enable Read Aloud', toggleReadAloud);
-    }
-
     // Toggle function
     function toggleReadAloud() {
         readAloudEnabled = !readAloudEnabled;
         GM_setValue('readAloudEnabled', readAloudEnabled);
-        // Note: Menu text won't update until script reloads (e.g., page refresh)
+        alert(`Read Aloud is now ${readAloudEnabled ? 'enabled' : 'disabled'}.`);
     }
 
-    updateMenu();
+    // Register menu command with fixed text
+    GM_registerMenuCommand('Toggle Read Aloud', toggleReadAloud);
 
     // Find the overlay div
     const overlayDiv = document.getElementById('overlayMsgs');
@@ -37,8 +33,8 @@
         return;
     }
 
-    // Preload notification bell sound (replace URL with any public bell sound if needed)
-    const bellSound = new Audio('https://www.myinstants.com/media/sounds/fears-to-fathom-notification-sound.mp3'); // Example bell sound
+    // Preload notification bell sound
+    const bellSound = new Audio('https://www.myinstants.com/media/sounds/fears-to-fathom-notification-sound.mp3');
 
     // Set up MutationObserver to detect new spans (messages)
     const observer = new MutationObserver((mutations) => {
@@ -63,11 +59,13 @@
                             message = fullText.trim();
                         }
 
-                        // Read aloud if enabled
-                        if (readAloudEnabled) {
-                            const utterance = new SpeechSynthesisUtterance(`${sender} says: ${message}`);
-                            speechSynthesis.speak(utterance);
-                        }
+                        // Delay read aloud by 3 seconds after starting the bell sound
+                        setTimeout(() => {
+                            if (readAloudEnabled) {
+                                const utterance = new SpeechSynthesisUtterance(`${sender} says: ${message}`);
+                                speechSynthesis.speak(utterance);
+                            }
+                        }, 3000);
                     }
                 });
             }
