@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Chat Notification and Read Aloud
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Plays a notification bell on new messages and reads them aloud (with toggle setting)
 // @author       Upamanyu Das
 // @match        https://vdo.ninja/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
 (function() {
@@ -15,16 +16,34 @@
 
     // Initialize read aloud setting (default: true)
     let readAloudEnabled = GM_getValue('readAloudEnabled', true);
+    let menuCommandId = null;
+
+    // Function to update menu command
+    function updateMenu() {
+        // Unregister previous menu command if it exists
+        if (menuCommandId) {
+            try {
+                GM_unregisterMenuCommand(menuCommandId);
+            } catch (e) {
+                console.log('Error unregistering menu command:', e);
+            }
+        }
+        // Register new menu command with updated text
+        menuCommandId = GM_registerMenuCommand(
+            readAloudEnabled ? 'Disable Read Aloud' : 'Enable Read Aloud',
+            toggleReadAloud
+        );
+    }
 
     // Toggle function
     function toggleReadAloud() {
         readAloudEnabled = !readAloudEnabled;
         GM_setValue('readAloudEnabled', readAloudEnabled);
-        alert(`Read Aloud is now ${readAloudEnabled ? 'enabled' : 'disabled'}.`);
+        updateMenu(); // Update menu text immediately
     }
 
-    // Register menu command with fixed text
-    GM_registerMenuCommand('Toggle Read Aloud', toggleReadAloud);
+    // Initial menu setup
+    updateMenu();
 
     // Find the overlay div
     const overlayDiv = document.getElementById('overlayMsgs');
