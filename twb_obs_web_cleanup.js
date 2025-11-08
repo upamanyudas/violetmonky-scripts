@@ -81,7 +81,7 @@
 
     const iframe = document.createElement('iframe');
     iframe.src = 'https://twb-obs-sfx.dmg.li/audio-monitor.html';
-    iframe.style.cssText = 'width:240px;height:60px;border:none;border-radius:6px;';
+    iframe.style.cssText = 'width:230px;height:57px;border:none;border-radius:6px;';
     iframe.title = 'Audio Monitors';
     iframe.scrolling = 'no';
 
